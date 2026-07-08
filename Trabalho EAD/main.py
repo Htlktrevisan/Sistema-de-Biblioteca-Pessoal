@@ -16,6 +16,12 @@ from relatorios import (
     imprimir_matriz_relatorio,
     contar_livros_por_status,
 )
+from persistencia import (
+    salvar_usuarios,
+    carregar_usuarios,
+    salvar_livros,
+    carregar_livros,
+)
 
 
 def menu_inicial():
@@ -53,6 +59,7 @@ def fluxo_cadastrar_usuario(usuarios):
 
     sucesso = cadastrar_usuario(usuarios, nome, username, senha, nascimento)
     if sucesso:
+        salvar_usuarios(usuarios)
         print("Usuário cadastrado com sucesso!\n")
     else:
         print("Já existe um usuário com esse username. Tente outro.\n")
@@ -74,6 +81,7 @@ def fluxo_editar_usuario(usuarios, usuario_logado):
     if novo_nascimento:
         usuario_logado["nascimento"] = novo_nascimento
 
+    salvar_usuarios(usuarios)
     print("Dados atualizados!\n")
 
 
@@ -97,6 +105,7 @@ def fluxo_cadastrar_livro(livros):
 
     sucesso = cadastrar_livro(livros, titulo, autor, editora, edicao, ano, isbn, status, paginas_totais, paginas_lidas)
     if sucesso:
+        salvar_livros(livros)
         print("Livro cadastrado com sucesso!\n")
     else:
         print("Já existe um livro com esse ISBN.\n")
@@ -112,14 +121,15 @@ def fluxo_editar_livro(livros):
 
     sucesso = editar_livro(livros, isbn, status=novo_status, paginas_lidas=novas_paginas_lidas)
     if sucesso:
+        salvar_livros(livros)
         print("Livro atualizado!\n")
     else:
         print("Não foi encontrado nenhum livro com esse ISBN.\n")
 
 
 def main():
-    usuarios = []   # vetor de usuários (fica vazio até alguém se cadastrar)
-    livros = []     # vetor de livros
+    usuarios = carregar_usuarios()   # vetor de usuários, carregado do arquivo usuarios.csv
+    livros = carregar_livros()       # vetor de livros, carregado do arquivo livros.csv
     usuario_logado = None
 
     while True:
@@ -153,6 +163,7 @@ def main():
 
             elif opcao == "2":
                 excluir_usuario(usuarios, usuario_logado["username"])
+                salvar_usuarios(usuarios)
                 print("Conta excluída. Você será desconectado.\n")
                 usuario_logado = None
 
@@ -168,6 +179,7 @@ def main():
             elif opcao == "6":
                 isbn = input("ISBN do livro que deseja remover: ").strip()
                 if remover_livro(livros, isbn):
+                    salvar_livros(livros)
                     print("Livro removido!\n")
                 else:
                     print("Nenhum livro encontrado com esse ISBN.\n")
